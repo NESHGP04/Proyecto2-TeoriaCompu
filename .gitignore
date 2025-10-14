@@ -1,0 +1,4 @@
+* .cpython-313-*
+* .mypy_cache/
+* .pytest_cache/
+* .pyc
