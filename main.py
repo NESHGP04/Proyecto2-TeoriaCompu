@@ -1,138 +1,131 @@
-"""
-main.py
-Programa principal para el Proyecto 2 - Teoría de la Computación
-Algoritmo CYK para Parsing de Gramáticas CFG
-
-Autores: Camila Richter 23183, Marinés García 23391, Carlos Alburez 231311
-Fecha: Septiembre 2025
-"""
-
 from grammar import Grammar
 from cyk_parser import CYKParser
 from project_grammar import create_project_grammar
 
 
 def print_header():
-    """Imprime el encabezado del programa"""
     print("=" * 70)
-    print("   PROYECTO 2 - TEORÍA DE LA COMPUTACIÓN")
-    print("   Algoritmo CYK para Parsing de Gramáticas CFG")
+    print("   PROYECTO 2 - TEORIA DE LA COMPUTACION")
+    print("   Algoritmo CYK para Parsing de Gramaticas CFG")
     print("=" * 70)
 
 
-def run_test_examples(grammar: Grammar):
-    """
-    Ejecuta los ejemplos de prueba requeridos por el proyecto
+def mostrar_menu():
+    print("\n" + "=" * 70)
+    print("MENU PRINCIPAL")
+    print("=" * 70)
+    print("1. Ejecutar ejemplos de prueba predefinidos")
+    print("2. Modo interactivo (ingresar sentencias)")
+    print("3. Salir")
+    print("=" * 70)
+
+
+def ejecutar_ejemplos(grammar):
     
-    Ejemplos incluidos:
-    - 2 sintáctica y semánticamente correctas
-    - 2 sintácticamente correctas pero semánticamente incorrectas
-    - 2 no aceptadas por la gramática
-    """
-    
-    # Ejemplos de prueba
-    test_sentences = [
-        # Sintáctica y semánticamente correctas
-        ("she eats a cake with a fork", "✅ Sintáctica y semánticamente correcta"),
-        ("the cat drinks the beer", "✅ Sintáctica y semánticamente correcta"),
-        
-        # Sintácticamente correctas, semánticamente incorrectas
-        ("the fork eats a cat", "⚠️ Sintácticamente correcta, semánticamente incorrecta"),
-        ("he drinks the oven", "⚠️ Sintácticamente correcta, semánticamente incorrecta"),
-        
-        # No aceptadas por la gramática
-        ("she eats", "❌ No aceptada (incompleta)"),
-        ("cat the drinks", "❌ No aceptada (orden incorrecto)")
+    # Ejemplos de prueba del proyecto
+    ejemplos = [
+        ("she eats a cake with a fork", "Sintactica y semanticamente correcta"),
+        ("the cat drinks the beer", "Sintactica y semanticamente correcta"),
+        ("the fork eats a cat", "Sintacticamente correcta, semanticamente incorrecta"),
+        ("he drinks the oven", "Sintacticamente correcta, semanticamente incorrecta"),
+        ("she eats", "No aceptada (incompleta)"),
+        ("cat the drinks", "No aceptada (orden incorrecto)")
     ]
     
     print("\n" + "=" * 70)
     print("EJEMPLOS DE PRUEBA")
     print("=" * 70)
     
-    for sentence, description in test_sentences:
-        print(f"\n📝 {description}")
+    for sentencia, descripcion in ejemplos:
+        print(f"\n{descripcion}")
         parser = CYKParser(grammar)
-        accepted, exec_time = parser.parse(sentence)
+        es_aceptada, tiempo = parser.parse(sentencia)
         
         print("\n" + "-" * 70)
-        if accepted:
-            print(f"✅ SÍ - La sentencia es aceptada")
-            print(f"⏱️  Tiempo de ejecución: {exec_time:.6f} segundos")
+        if es_aceptada:
+            print(f"SI - La sentencia es aceptada")
+            print(f"Tiempo de ejecucion: {tiempo:.6f} segundos")
             
-            # Construir y mostrar árbol
-            tree = parser.build_parse_tree()
-            parser.print_parse_tree(tree)
+            arbol = parser.build_parse_tree()
+            parser.print_parse_tree_compact(arbol)
         else:
-            print(f"❌ NO - La sentencia NO es aceptada")
-            print(f"⏱️  Tiempo de ejecución: {exec_time:.6f} segundos")
+            print(f"NO - La sentencia NO es aceptada")
+            print(f"Tiempo de ejecucion: {tiempo:.6f} segundos")
         print("-" * 70)
-
-
-def interactive_mode(grammar: Grammar):
-    """
-    Modo interactivo para probar sentencias personalizadas
     
-    Permite al usuario ingresar sus propias sentencias y ver
-    si son aceptadas por la gramática
-    """
+    print("\nEjemplos completados!")
+    input("\nPresiona Enter para volver al menu principal...")
+
+
+def modo_interactivo(grammar):
     print("\n" + "=" * 70)
     print("MODO INTERACTIVO")
     print("=" * 70)
     print("Ingresa tus propias sentencias para probar")
-    print("(escribe 'salir' para terminar)\n")
+    print("(escribe 'salir' o 'menu' para volver al menu principal)\n")
     
     while True:
-        sentence = input("📝 Ingresa una sentencia: ").strip()
+        sentencia = input("\nIngresa una sentencia: ").strip()
         
-        if sentence.lower() in ['salir', 'exit', 'quit', 'q']:
-            print("\n👋 ¡Hasta luego!")
+        if sentencia.lower() in ['salir', 'exit', 'quit', 'q', 'menu']:
+            print("\nVolviendo al menu principal...")
             break
         
-        if not sentence:
+        if not sentencia:
+            print("Por favor ingresa una sentencia valida")
             continue
         
         parser = CYKParser(grammar)
-        accepted, exec_time = parser.parse(sentence)
+        es_aceptada, tiempo = parser.parse(sentencia)
         
         print("\n" + "-" * 70)
-        if accepted:
-            print(f"✅ SÍ - La sentencia es aceptada")
-            print(f"⏱️  Tiempo de ejecución: {exec_time:.6f} segundos")
+        if es_aceptada:
+            print(f"SI - La sentencia es aceptada")
+            print(f"Tiempo de ejecucion: {tiempo:.6f} segundos")
             
-            tree = parser.build_parse_tree()
-            parser.print_parse_tree(tree)
+            arbol = parser.build_parse_tree()
+            parser.print_parse_tree_compact(arbol)
         else:
-            print(f"❌ NO - La sentencia NO es aceptada")
-            print(f"⏱️  Tiempo de ejecución: {exec_time:.6f} segundos")
-        print("-" * 70 + "\n")
+            print(f"NO - La sentencia NO es aceptada")
+            print(f"Tiempo de ejecucion: {tiempo:.6f} segundos")
+        print("-" * 70)
 
 
-def main():
-    """
-    Función principal del programa
-    
-    Flujo:
-    1. Crear gramática del proyecto
-    2. Convertir a CNF
-    3. Ejecutar ejemplos de prueba
-    4. Modo interactivo
-    """
-    # Imprimir encabezado
-    print_header()
-    
-    # Crear gramática del proyecto
-    print("\n📚 Cargando gramática del proyecto...")
-    grammar = create_project_grammar()
-    
-    # Convertir a CNF
-    grammar.to_cnf()
-    
-    # Ejecutar ejemplos de prueba
-    run_test_examples(grammar)
-    
-    # Modo interactivo
-    interactive_mode(grammar)
+# Programa principal
+print_header()
 
+print("\nCargando gramatica del proyecto...")
+gramatica = create_project_grammar()
 
-if __name__ == "__main__":
-    main()
+# Convertir a CNF
+gramatica.to_cnf()
+
+# Loop del menu
+while True:
+    mostrar_menu()
+    
+    try:
+        opcion = input("\nSelecciona una opcion (1-3): ").strip()
+        
+        if opcion == '1':
+            ejecutar_ejemplos(gramatica)
+        
+        elif opcion == '2':
+            modo_interactivo(gramatica)
+        
+        elif opcion == '3':
+            print("\n" + "=" * 70)
+            print("Gracias por usar el parser CYK!")
+            print("=" * 70)
+            break
+        
+        else:
+            print("\nOpcion invalida. Por favor selecciona 1, 2 o 3.")
+            input("Presiona Enter para continuar...")
+    
+    except KeyboardInterrupt:
+        print("\n\nHasta luego!")
+        break
+    except Exception as error:
+        print(f"\nError: {error}")
+        input("Presiona Enter para continuar...")
