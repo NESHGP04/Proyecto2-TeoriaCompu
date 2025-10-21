@@ -1,16 +1,9 @@
-"""
-cyk_parser.py
-Implementación del algoritmo CYK (Cocke-Younger-Kasami) para parsing de CFG
-Proyecto 2 - Teoría de la Computación
-"""
-
 import time
 from typing import Tuple
 from grammar import Grammar
 
 
 class CYKParser:
-    """Implementa el algoritmo CYK para parsing"""
     
     def __init__(self, grammar: Grammar):
         self.grammar = grammar
@@ -18,22 +11,14 @@ class CYKParser:
         self.parse_tree = None
     
     def parse(self, sentence: str) -> Tuple[bool, float]:
-        """
-        Ejecuta el algoritmo CYK para determinar si la sentencia pertenece al lenguaje
-        
-        Args:
-            sentence: La sentencia a analizar
-            
-        Returns:
-            Tuple con (aceptada: bool, tiempo_ejecución: float)
-        """
+    
         start_time = time.time()
         
         # Tokenizar la sentencia
         words = sentence.lower().split()
         n = len(words)
         
-        print(f"\n🔍 Analizando: '{sentence}'")
+        print(f"\nAnalizando: '{sentence}'")
         print(f"   Tokens: {words}")
         print(f"   Longitud: {n} palabras\n")
         
@@ -44,7 +29,7 @@ class CYKParser:
         self.parse_tree = [[{} for _ in range(n)] for _ in range(n)]
         
         # Paso 1: Llenar la diagonal (subcadenas de longitud 1)
-        print("📊 Llenando tabla CYK...")
+        print("Llenando tabla CYK...")
         for i in range(n):
             word = words[i]
             # Buscar todas las variables que producen esta palabra
@@ -88,80 +73,91 @@ class CYKParser:
         
         return accepted, execution_time
     
-    def build_parse_tree(self, i: int = 0, j: int = None, variable: str = None) -> str:
-        """
-        Construye y retorna el árbol de parsing como string
+    def build_parse_tree(self, i: int = 0, j: int = None, variable: str = None) -> dict:
         
-        Args:
-            i: Posición inicial en la tabla
-            j: Longitud - 1 en la tabla
-            variable: Variable a expandir
-            
-        Returns:
-            String representando el árbol de parsing
-        """
         if j is None:
             j = len(self.table) - 1
         if variable is None:
             variable = self.grammar.start_symbol
         
         if variable not in self.parse_tree[i][j]:
-            return f"{variable}(?)"
+            return {"node": variable, "children": None}
         
         derivation = self.parse_tree[i][j][variable]
         
         # Caso base: terminal
         if len(derivation) == 1 and isinstance(derivation[0], str):
-            return f"{variable}({derivation[0]})"
+            return {
+                "node": variable,
+                "terminal": derivation[0]
+            }
         
         # Caso recursivo: dos variables
         if len(derivation) == 3:
             B, C, k = derivation
             left_tree = self.build_parse_tree(i, k-1, B)
-            right_tree = self.build_parse_tree(i+k, j-k, C)
-            return f"{variable}[{left_tree}, {right_tree}]"
+            # CORRECCIÓN: Calcular correctamente la longitud para el subárbol derecho
+            length = j + 1  # j es length-1, así que length = j+1
+            right_tree = self.build_parse_tree(i+k, length-k-1, C)
+            return {
+                "node": variable,
+                "left": left_tree,
+                "right": right_tree
+            }
         
-        return f"{variable}"
+        return {"node": variable}
     
-    def print_parse_tree(self, tree_str: str, indent: int = 0):
-        """
-        Imprime el árbol de parsing de forma legible
+    def print_parse_tree_compact(self, tree: dict = None, prefix: str = "", is_tail: bool = True):
         
-        Args:
-            tree_str: String del árbol generado por build_parse_tree()
-            indent: Nivel de indentación (para recursión)
-        """
-        print("\n🌳 Parse Tree:")
-        self._print_tree_recursive(tree_str, indent)
+        if tree is None:
+            tree = self.build_parse_tree()
+            print("\nParse Tree:")
+        
+        node = tree["node"]
+        
+        # Elegir el conector apropiado
+        connector = "└── " if is_tail else "├── "
+        
+        # Caso terminal
+        if "terminal" in tree:
+            print(f"{prefix}{connector}{node} → '{tree['terminal']}'")
+            return
+        
+        # Caso no terminal
+        print(f"{prefix}{connector}{node}")
+        
+        if "left" in tree and "right" in tree:
+            # Calcular nuevo prefijo
+            extension = "    " if is_tail else "│   "
+            new_prefix = prefix + extension
+            
+            # Imprimir hijos
+            self.print_parse_tree_compact(tree["left"], new_prefix, False)
+            self.print_parse_tree_compact(tree["right"], new_prefix, True)
     
-    def _print_tree_recursive(self, tree_str: str, indent: int = 0):
-        """Imprime recursivamente el árbol"""
-        if '(' in tree_str:
-            # Terminal: Variable(terminal)
-            var, rest = tree_str.split('(', 1)
-            terminal = rest.rstrip(')')
-            print("  " * indent + f"├─ {var}")
-            print("  " * indent + f"│  └─ '{terminal}'")
+    def print_parse_tree_improved(self, indent: int = 0, tree: dict = None):
         
-        elif '[' in tree_str:
-            # No terminal: Variable[left, right]
-            var, rest = tree_str.split('[', 1)
-            print("  " * indent + f"├─ {var}")
+        if tree is None:
+            tree = self.build_parse_tree()
+            print("\nParse Tree:")
+        
+        node = tree["node"]
+        prefix = "  " * indent
+        
+        # Caso terminal
+        if "terminal" in tree:
+            print(f"{prefix}└─ {node}")
+            print(f"{prefix}   └─ '{tree['terminal']}'")
+            return
+        
+        # Caso con hijos
+        print(f"{prefix}└─ {node}")
+        
+        if "left" in tree and "right" in tree:
+            # Imprimir hijo izquierdo
+            print(f"{prefix}   ├─ Left:")
+            self.print_parse_tree_improved(indent + 2, tree["left"])
             
-            # Dividir left y right
-            bracket_count = 0
-            split_pos = 0
-            for i, char in enumerate(rest):
-                if char == '[':
-                    bracket_count += 1
-                elif char == ']':
-                    bracket_count -= 1
-                elif char == ',' and bracket_count == 0:
-                    split_pos = i
-                    break
-            
-            left = rest[:split_pos]
-            right = rest[split_pos+2:-1]  # +2 para saltar ", "
-            
-            self._print_tree_recursive(left, indent + 1)
-            self._print_tree_recursive(right, indent + 1)
+            # Imprimir hijo derecho
+            print(f"{prefix}   └─ Right:")
+            self.print_parse_tree_improved(indent + 2, tree["right"])
