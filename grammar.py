@@ -35,7 +35,7 @@ class Grammar:
     
     def to_cnf(self):
         """Convierte la gramática a Forma Normal de Chomsky (CNF)"""
-        print("\n🔄 Convirtiendo gramática a CNF...")
+        print("\nConvirtiendo gramática a CNF...")
         
         # Paso 1: Eliminar reglas unitarias (A -> B)
         self._eliminate_unit_rules()
@@ -102,7 +102,7 @@ class Grammar:
                     new_rules[current_var].append((prod_list[-2], prod_list[-1]))
         
         self.rules = new_rules
-        print("✅ Gramática convertida a CNF")
+        print("Gramática convertida a CNF")
         self._print_cnf_grammar()
     
     def _eliminate_unit_rules(self):
@@ -129,7 +129,7 @@ class Grammar:
     
     def _print_cnf_grammar(self):
         """Imprime la gramática en CNF"""
-        print("\n📋 Gramática en CNF:")
+        print("\nGramática en CNF:")
         for var in sorted(self.rules.keys()):
             productions = [' '.join(prod) for prod in self.rules[var]]
             print(f"  {var} → {' | '.join(productions)}")
