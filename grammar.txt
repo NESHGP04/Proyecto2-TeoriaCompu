@@ -1,0 +1,36 @@
+# Gramática de Expresiones Numéricas Simples
+
+# Estructura
+S -> Num Op Num
+S -> Num
+
+# Números
+Num -> one
+Num -> two
+Num -> three
+Num -> four
+Num -> five
+Num -> six
+Num -> seven
+Num -> eight
+Num -> nine
+Num -> ten
+
+# Operadores
+Op -> plus
+Op -> minus
+Op -> times
+
+# FRASES DE PRUEBA:
+# ACEPTADAS:
+# one plus two
+# three minus one
+# five times six
+# seven
+# ten
+
+# RECHAZADAS:
+# one two
+# plus three
+# one plus
+# one plus two minus three

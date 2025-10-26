@@ -1,8 +1,3 @@
-"""
-project_grammar.py
-Define la gramática específica del Proyecto 2
-Proyecto 2 - Teoría de la Computación
-"""
 
 from grammar import Grammar
 

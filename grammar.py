@@ -1,8 +1,4 @@
-"""
-grammar.py
-Clase para representar y manipular gramáticas libres de contexto (CFG)
-Proyecto 2 - Teoría de la Computación
-"""
+
 
 from collections import defaultdict
 from typing import Dict, List, Set, Tuple
@@ -53,15 +49,37 @@ class Grammar:
                         new_rules[variable].append(prod)
                 
                 elif len(prod) == 2:
-                    # Verificar si ambos son no-terminales
-                    if all(p.isupper() or p.startswith('X') or p.startswith('T_') for p in prod):
+                    # CORRECCIÓN: Verificar si son variables REALES, no solo por mayúsculas
+                    # Un símbolo es no-terminal si:
+                    # 1. Está en mayúscula, O
+                    # 2. Es una variable auxiliar (X0, T_), O
+                    # 3. Está registrado en self.variables
+                    
+                    both_nonterminals = all(
+                        p.isupper() or 
+                        p.startswith('X') or 
+                        p.startswith('T_') or
+                        p in self.variables  # ← CORRECCIÓN: Verificar si es variable registrada
+                        for p in prod
+                    )
+                    
+                    if both_nonterminals:
                         # Ya está en CNF: A -> BC
                         new_rules[variable].append(prod)
                     else:
                         # Tiene terminales mezclados: reemplazar terminales con variables
                         new_prod = []
                         for symbol in prod:
-                            if symbol.islower() or symbol in self.terminals:
+                            # Un símbolo es terminal si:
+                            # 1. Está en minúscula Y
+                            # 2. NO está en variables Y
+                            # 3. Está en terminales
+                            is_terminal = (
+                                (symbol.islower() or symbol in self.terminals) and
+                                symbol not in self.variables  # ← CORRECCIÓN
+                            )
+                            
+                            if is_terminal:
                                 # Es terminal, crear variable nueva si no existe
                                 if symbol not in terminal_vars:
                                     terminal_vars[symbol] = f"T_{symbol}"
@@ -69,6 +87,7 @@ class Grammar:
                                     new_rules[terminal_vars[symbol]].append((symbol,))
                                 new_prod.append(terminal_vars[symbol])
                             else:
+                                # Es no-terminal (variable)
                                 new_prod.append(symbol)
                         new_rules[variable].append(tuple(new_prod))
                 
@@ -79,7 +98,12 @@ class Grammar:
                     # Primero, reemplazar terminales con variables
                     prod_list = []
                     for symbol in prod:
-                        if symbol.islower() or symbol in self.terminals:
+                        is_terminal = (
+                            (symbol.islower() or symbol in self.terminals) and
+                            symbol not in self.variables  # ← CORRECCIÓN
+                        )
+                        
+                        if is_terminal:
                             if symbol not in terminal_vars:
                                 terminal_vars[symbol] = f"T_{symbol}"
                                 self.variables.add(terminal_vars[symbol])
@@ -114,7 +138,8 @@ class Grammar:
             
             for variable, productions in self.rules.items():
                 for prod in productions:
-                    if len(prod) == 1 and prod[0].isupper() and prod[0] in self.rules:
+                    # CORRECCIÓN: Verificar si es unitaria chequeando self.variables
+                    if len(prod) == 1 and prod[0] in self.variables and prod[0] in self.rules:
                         # Es regla unitaria A -> B, expandir con las reglas de B
                         for b_prod in self.rules[prod[0]]:
                             if b_prod not in new_rules[variable]:
